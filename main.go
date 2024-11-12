@@ -12,50 +12,48 @@ import (
 )
 
 func main() {
-	in := flag.String("input", "icons", "input dir")
-	out := flag.String("output", "out", "output dir")
+	in := flag.String("i", "icons", "input dir")
+	out := flag.String("o", "drawio-icons.xml", "output file")
 	flag.Parse()
+	if err := createLib(*in, *out); err != nil {
+		panic(err)
+	}
+}
 
-	fs, err := os.ReadDir(*in)
+func createLib(inputDir, outputFile string) error {
+	fs, err := os.ReadDir(inputDir)
 	if err != nil {
-		panic(err)
+		return err
 	}
-	lib, err := os.Create(filepath.Join(*out, "my_drawio_lib.xml"))
+	lib, err := os.Create(outputFile)
 	if err != nil {
-		panic(err)
+		return err
 	}
+	defer lib.Close()
 	lib.WriteString("<mxlibrary>[")
 	for i, f := range fs {
-		t, err := os.ReadFile(filepath.Join(*in, f.Name()))
+		t, err := os.ReadFile(filepath.Join(inputDir, f.Name()))
 		if err != nil {
-			panic(err)
+			return err
 		}
 		svg, err := svgparser.Parse(bytes.NewReader(t), false)
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		w, err := newWriter()
 		if err != nil {
-			panic(err)
+			return err
 		}
 		w.Process(svg)
-		if err := os.MkdirAll(*out, 0644); err != nil {
-			panic(err)
-		}
-		out, err := os.Create(filepath.Join(*out, f.Name()))
-		if err != nil {
-			panic(err)
-		}
-		out.Write(w.out.Bytes())
-		out.Close()
 		lib.WriteString(fmt.Sprintf(`{"title":"%s","data":"data:image/svg+xml;base64,%s;editableCssRules=.*;","w":24,"h":24,"aspect":"fixed"}`, f.Name(), w.Base64()))
 		if i < len(fs)-1 {
 			lib.WriteString(",")
 		}
 	}
 	lib.WriteString("]</mxlibrary>")
-	lib.Close()
+
+	return nil
 }
 
 type Writer struct {
@@ -83,7 +81,7 @@ func (w *Writer) Process(e *svgparser.Element) {
 		if k == "fill" || k == "stroke" || k == "color" {
 			style += fmt.Sprintf("%s:%s; ", k, v)
 			hasStyles = true
-		} else {
+		} else if k != "class" { // ignore class attribute as svg doesn't allow class to be redefined.
 			attrs.WriteString(fmt.Sprintf(`%v=%q `, k, v))
 		}
 	}
