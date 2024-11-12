@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/JoshVarga/svgparser"
 )
@@ -73,24 +74,29 @@ func (w *Writer) Base64() string {
 }
 
 func (w *Writer) Process(e *svgparser.Element) {
-	attrs := bytes.NewBuffer(nil)
+	attrs := new(strings.Builder)
 	styleName := fmt.Sprintf("style%d", len(w.outStyles))
-	style := fmt.Sprintf(`.style%d{`, len(w.outStyles))
+	style := new(strings.Builder)
+	style.WriteString(fmt.Sprintf(`.style%d{`, len(w.outStyles)))
 	hasStyles := false
+
 	for k, v := range e.Attributes {
 		if k == "fill" || k == "stroke" || k == "color" {
-			style += fmt.Sprintf("%s:%s; ", k, v)
+			style.WriteString(fmt.Sprintf("%s:%s; ", k, v))
 			hasStyles = true
-		} else if k != "class" { // ignore class attribute as svg doesn't allow class to be redefined.
-			attrs.WriteString(fmt.Sprintf(`%v=%q `, k, v))
+			continue
 		}
+		// ignore class attribute as svg doesn't allow class to be redefined.
+		if k == "class" {
+			continue
+		}
+		attrs.WriteString(fmt.Sprintf(`%v=%q `, k, v))
 	}
 	if hasStyles {
-		style += "}"
+		style.WriteString("}")
+		w.outStyles = append(w.outStyles, style.String())
+
 		attrs.WriteString(fmt.Sprintf(`class=%q `, styleName))
-
-		w.outStyles = append(w.outStyles, style)
-
 	}
 	if e.Name == "path" {
 		w.out.Write([]byte(fmt.Sprintf("<%s %s />", e.Name, attrs)))
