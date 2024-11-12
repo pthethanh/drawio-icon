@@ -25,7 +25,7 @@ func main() {
 		panic(err)
 	}
 	lib.WriteString("<mxlibrary>[")
-	for _, f := range fs {
+	for i, f := range fs {
 		t, err := os.ReadFile(filepath.Join(*in, f.Name()))
 		if err != nil {
 			panic(err)
@@ -49,7 +49,10 @@ func main() {
 		}
 		out.Write(w.out.Bytes())
 		out.Close()
-		lib.WriteString(fmt.Sprintf(`{"title":"%s","data":"data:image/svg+xml;base64,%s;editableCssRules=.*;","w":24,"h":24,"aspect":"fixed"},`, f.Name(), w.Base64()))
+		lib.WriteString(fmt.Sprintf(`{"title":"%s","data":"data:image/svg+xml;base64,%s;editableCssRules=.*;","w":24,"h":24,"aspect":"fixed"}`, f.Name(), w.Base64()))
+		if i < len(fs)-1 {
+			lib.WriteString(",")
+		}
 	}
 	lib.WriteString("]</mxlibrary>")
 	lib.Close()
