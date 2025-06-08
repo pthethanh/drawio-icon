@@ -11,19 +11,19 @@ import (
 	"github.com/JoshVarga/svgparser"
 )
 
-func Generate(iconDir, outputFilePath string) error {
-	fs, err := os.ReadDir(iconDir)
+func Generate(outputFile, inputDir string) error {
+	fs, err := os.ReadDir(inputDir)
 	if err != nil {
 		return err
 	}
-	lib, err := os.Create(outputFilePath)
+	lib, err := os.Create(outputFile)
 	if err != nil {
 		return err
 	}
 	defer lib.Close()
 	lib.WriteString("<mxlibrary>[")
 	for i, f := range fs {
-		t, err := os.ReadFile(filepath.Join(iconDir, f.Name()))
+		t, err := os.ReadFile(filepath.Join(inputDir, f.Name()))
 		if err != nil {
 			return err
 		}
