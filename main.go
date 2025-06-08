@@ -17,14 +17,21 @@ import (
 func main() {
 	query := flag.String("query", "json", "query")
 	limit := flag.Int("limit", 100, "query limit")
+	combine := flag.Bool("combine", false, "combine all keywords together in a single file output?")
 	outDir := flag.String("outputDir", "output", "output directory")
 
 	flag.Parse()
 
-	iconDir, err := os.MkdirTemp(os.TempDir(), *query)
-	if err != nil {
-		log.Panic(err)
+	dirName, _, _ := strings.Cut(*query, ",")
+	iconDir := ""
+	if *combine {
+		dir, err := os.MkdirTemp(os.TempDir(), dirName)
+		if err != nil {
+			log.Panic(err)
+		}
+		iconDir = dir
 	}
+
 	if err := os.MkdirAll(*outDir, os.ModePerm); err != nil {
 		log.Panic(err)
 	}
@@ -39,13 +46,28 @@ func main() {
 		if q == "" {
 			continue
 		}
+		if !*combine {
+			dir, err := os.MkdirTemp(os.TempDir(), q)
+			if err != nil {
+				log.Panic(err)
+			}
+			iconDir = dir
+		}
 		if err := iconify.Search(iconDir, q, *limit); err != nil {
 			log.Println(err)
 		}
+		if !*combine {
+			outputLibFile := filepath.Join(*outDir, fmt.Sprintf("%s.xml", q))
+			if err := lib.Generate(outputLibFile, iconDir); err != nil {
+				panic(err)
+			}
+			_ = os.RemoveAll(iconDir)
+		}
 	}
-	outName, _, _ := strings.Cut(*query, ",")
-	outputLibFile := filepath.Join(*outDir, fmt.Sprintf("%s.xml", outName))
-	if err := lib.Generate(outputLibFile, iconDir); err != nil {
-		panic(err)
+	if *combine {
+		outputLibFile := filepath.Join(*outDir, fmt.Sprintf("%s.xml", dirName+"_combine"))
+		if err := lib.Generate(outputLibFile, iconDir); err != nil {
+			panic(err)
+		}
 	}
 }
