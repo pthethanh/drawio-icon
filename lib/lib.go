@@ -37,7 +37,7 @@ func Generate(outputFile, inputDir string) error {
 			return err
 		}
 		w.Process(svg)
-		lib.WriteString(fmt.Sprintf(`{"title":"%s","data":"data:image/svg+xml;base64,%s;editableCssRules=.*;","w":24,"h":24,"aspect":"fixed"}`, f.Name(), w.Base64()))
+		lib.WriteString(fmt.Sprintf(`{"title":"%s","data":"data:image/svg+xml;base64,%s;editableCssRules=.*;","w":32,"h":32,"aspect":"fixed"}`, f.Name(), w.Base64()))
 		if i < len(fs)-1 {
 			lib.WriteString(",")
 		}

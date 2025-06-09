@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/joho/godotenv"
 	"github.com/pthethanh/drawio-icon/iconify"
 	"github.com/pthethanh/drawio-icon/kw"
 	"github.com/pthethanh/drawio-icon/lib"
@@ -21,6 +22,9 @@ func main() {
 	outDir := flag.String("outputDir", "output", "output directory")
 
 	flag.Parse()
+	if err := godotenv.Load(); err != nil {
+		log.Fatal("Error loading .env file")
+	}
 
 	dirName, _, _ := strings.Cut(*query, ",")
 	iconDir := ""
