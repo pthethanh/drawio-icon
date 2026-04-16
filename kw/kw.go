@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -30,7 +31,9 @@ type OpenAIResponse struct {
 func GetRelevantKeywords(userQuery string) ([]string, error) {
 	apiKey := os.Getenv("OPENAI_API_KEY")
 	if apiKey == "" {
-		return nil, fmt.Errorf("OPENAI_API_KEY is not set")
+		log.Println("OPENAI_API_KEY is not set, fall back to user original query")
+		return strings.Split(userQuery, ","), nil
+		//return nil, fmt.Errorf("OPENAI_API_KEY is not set")
 	}
 
 	url := "https://api.openai.com/v1/chat/completions"
