@@ -145,22 +145,32 @@ Output:
 	response = strings.TrimSpace(response)
 	parts := strings.Split(response, ",")
 
-	var keywords []string
-
+	var keywords map[string]struct{} = make(map[string]struct{})
 	for _, p := range parts {
 		kw := strings.TrimSpace(p)
 
 		if kw != "" {
-			keywords = append(keywords, kw)
+			keywords[kw] = struct{}{}
+			// some keywords might be compound, so split them by space and add those too
+			// this is mostly because the hallucinated keywords from the
+			skw := strings.Split(kw, " ")
+			for _, k := range skw {
+				k = strings.TrimSpace(k)
+				if k != "" {
+					keywords[k] = struct{}{}
+				}
+			}
 		}
 	}
-
 	// Fallback if model returned garbage
 	if len(keywords) == 0 {
 		return fallbackKeywords(userQuery), nil
 	}
-
-	return keywords, nil
+	var rs []string
+	for k := range keywords {
+		rs = append(rs, k)
+	}
+	return rs, nil
 }
 
 func fallbackKeywords(userQuery string) []string {
