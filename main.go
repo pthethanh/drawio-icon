@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/joho/godotenv"
 	"github.com/pthethanh/drawio-icon/iconify"
 	"github.com/pthethanh/drawio-icon/kw"
 	"github.com/pthethanh/drawio-icon/lib"
@@ -18,13 +17,11 @@ import (
 func main() {
 	query := flag.String("query", "json", "query")
 	limit := flag.Int("limit", 100, "query limit")
+	model := flag.String("model", "qwen3.5:0.8b", "ollama model to use")
 	combine := flag.Bool("combine", false, "combine all keywords together in a single file output?")
 	outDir := flag.String("outputDir", "output", "output directory")
 
 	flag.Parse()
-	if err := godotenv.Load(); err != nil {
-		log.Fatal("Error loading .env file")
-	}
 
 	dirName, _, _ := strings.Cut(*query, ",")
 	iconDir := ""
@@ -39,7 +36,7 @@ func main() {
 	if err := os.MkdirAll(*outDir, os.ModePerm); err != nil {
 		log.Panic(err)
 	}
-	kws, err := kw.GetRelevantKeywords(*query)
+	kws, err := kw.GetRelevantKeywords(*model, *query)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -63,7 +60,7 @@ func main() {
 		if !*combine {
 			outputLibFile := filepath.Join(*outDir, fmt.Sprintf("%s.xml", q))
 			if err := lib.Generate(outputLibFile, iconDir); err != nil {
-				panic(err)
+				log.Panic(err)
 			}
 			_ = os.RemoveAll(iconDir)
 		}
@@ -71,7 +68,7 @@ func main() {
 	if *combine {
 		outputLibFile := filepath.Join(*outDir, fmt.Sprintf("%s.xml", dirName+"_combine"))
 		if err := lib.Generate(outputLibFile, iconDir); err != nil {
-			panic(err)
+			log.Panic(err)
 		}
 	}
 }

@@ -56,6 +56,7 @@ func Search(outputDir string, query string, limit int) error {
 			log.Printf("Failed to download %s: %v\n", icon, err)
 		}
 	}
+	log.Println("searching done")
 	return nil
 }
 
