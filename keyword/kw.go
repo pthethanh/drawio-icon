@@ -1,4 +1,4 @@
-package kw
+package keyword
 
 import (
 	"context"
@@ -90,7 +90,7 @@ func generate(model, prompt string) (string, error) {
 	return res, nil
 }
 
-func GetRelevantKeywords(model, userQuery string) ([]string, error) {
+func Generate(model, userQuery string) ([]string, error) {
 	ctx := context.Background()
 
 	//sEnsure Ollama server is running

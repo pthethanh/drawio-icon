@@ -9,9 +9,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/pthethanh/drawio-icon/drawio"
 	"github.com/pthethanh/drawio-icon/iconify"
-	"github.com/pthethanh/drawio-icon/kw"
-	"github.com/pthethanh/drawio-icon/lib"
+	"github.com/pthethanh/drawio-icon/keyword"
 )
 
 func main() {
@@ -36,7 +36,7 @@ func main() {
 	if err := os.MkdirAll(*outDir, os.ModePerm); err != nil {
 		log.Panic(err)
 	}
-	kws, err := kw.GetRelevantKeywords(*model, *query)
+	kws, err := keyword.Generate(*model, *query)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -59,7 +59,7 @@ func main() {
 		}
 		if !*combine {
 			outputLibFile := filepath.Join(*outDir, fmt.Sprintf("%s.xml", q))
-			if err := lib.Generate(outputLibFile, iconDir); err != nil {
+			if err := drawio.GenerateLib(outputLibFile, iconDir); err != nil {
 				log.Panic(err)
 			}
 			_ = os.RemoveAll(iconDir)
@@ -67,7 +67,7 @@ func main() {
 	}
 	if *combine {
 		outputLibFile := filepath.Join(*outDir, fmt.Sprintf("%s.xml", dirName+"_combine"))
-		if err := lib.Generate(outputLibFile, iconDir); err != nil {
+		if err := drawio.GenerateLib(outputLibFile, iconDir); err != nil {
 			log.Panic(err)
 		}
 	}

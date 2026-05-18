@@ -1,4 +1,4 @@
-package lib
+package drawio
 
 import (
 	"bytes"
@@ -11,7 +11,7 @@ import (
 	"github.com/JoshVarga/svgparser"
 )
 
-func Generate(outputFile, inputDir string) error {
+func GenerateLib(outputFile, inputDir string) error {
 	fs, err := os.ReadDir(inputDir)
 	if err != nil {
 		return err
